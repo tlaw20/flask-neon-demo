@@ -1,8 +1,9 @@
 from flask import Flask, request 
 import psycopg 
 import os
+import datetime
 from dotenv import load_dotenv 
-DATABASE_URL = os.getenv("DATABASE_URL") 
+DATABASE_URL = "postgresql://neondb_owner:npg_CNnwvVKF9Gf1@ep-divine-tree-abq3by4v-pooler.eu-west-2.aws.neon.tech/neondb?sslmode=require&channel_binding=require"
 load_dotenv() 
 app = Flask(__name__) 
 DATABASE_URL = os.environ["DATABASE_URL"] 
@@ -13,14 +14,19 @@ def home():
             cur.execute(""" 
                 CREATE TABLE IF NOT EXISTS notes ( 
                     id SERIAL PRIMARY KEY, 
-                    content TEXT 
+                    content TEXT,
+                    date DATE,
+                    time TIME
                 ) 
             """) 
             if request.method == "POST": 
                 note = request.form["note"] 
+                currentdatetime=datetime.datetime.now()
+                date=currentdatetime.date()
+                time=currentdatetime.time()
                 cur.execute( 
-                    "INSERT INTO notes (content) VALUES (%s)", 
-                    (note,) 
+                    "INSERT INTO notes (content,date,time) VALUES (%s,%s,%s)",
+                    (note,date,time) 
                 ) 
             cur.execute( 
                 "SELECT id, content FROM notes ORDER BY id DESC"
